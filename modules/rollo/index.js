@@ -5,4 +5,4 @@
  * Time: 9:13 PM
  */
 module.exports.execute = require('./rolloExec').execute;
-module.exports.language = require('./rolloLanguage');
+module.exports.parse = require('./rolloLanguage').parse;
