@@ -29,8 +29,9 @@ function main(err, source) {
 
   var tree = Rollo.parse(source);
 
-  Rollo.execute.call(state, tree);
+  Rollo.execute.call(state, tree, function() {
+    console.log("Rollo: " + state.cmdCount + " commands evaluated, " + state.unknownCmdCount + " unknown commands encountered");
+  });
 
-  console.log("Rollo: " + state.cmdCount + " commands evaluated, " + state.unknownCmdCount + " unknown commands encountered");
 }
 
