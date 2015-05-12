@@ -1,0 +1,22 @@
+pointMe()
+say('Waiting for a tap')
+waitForTap()
+speed(50)
+go()
+turnRight()
+go()
+turn(-45)
+log("Wait 3 seconds")
+wait(3)
+setColor('green')
+speed(50)
+turnRight(20)
+go
+loop(2) {
+ turnLeft(45)
+ go()
+ wait(2)
+}
+turnAround()
+wait(1)
+stop()
