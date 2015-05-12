@@ -34,11 +34,17 @@ cmdWithPosNumber =
 cmdWithNumber =
     "turn"        // turn(180); turn(-45)
 
+cmdWithHexNumber =
+    "flash"
+   /"setColor"
+   /"color"
+
 cmdWithString =
     "log"         // log("this gets logged")
    /"say"         // alias for log
    /"flash"       // flash('red')
    /"setColor"    // setColor("green")
+   /"color"       // color("green") // alias for setColor
 
 cmdBlock =
     "loop"
@@ -62,6 +68,13 @@ posNumber =
     n:[0-9.]+
       { return parseInt(n.join("")); }
 
+hexNumber =
+    n1:"0x" n2:[0-9a-fA-F]+
+      { return parseInt(n1 + n2.join("")); }
+
+times =
+    " "* "time" "s"?
+
 string =
     s:[a-z,A-Z,0-9 ]*
       { return s.join(""); }
@@ -69,11 +82,13 @@ string =
 statement =
    c:cmd "()"
       { return [c]; }
-   /c:cmdBlock "(" n:number ")" " "* b:block
+   /c:cmdBlock "(" n:number times? ")" " "* b:block
       { return [c, n, b]; }
    /c:cmdWithNumber "(" n:number ")"
       { return [c, n]; }
    /c:cmdWithPosNumber "(" n:posNumber ")"
+      { return [c, n]; }
+   /c:cmdWithHexNumber "(" n:hexNumber ")"
       { return [c, n]; }
    /c:cmdWithString "(" ['] s:string ['] ")"
       { return [c, s]; }
@@ -88,7 +103,7 @@ endline =
     /"\r\n"
 
 block =
-    "{" endline? i:indentedLine+ "}" endline
+    "{" endline? i:indentedLine+ "}" endline?
       { return i }
 
 indentedLine =

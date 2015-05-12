@@ -27,20 +27,9 @@ function main(err, source) {
     return;
   }
 
-  var tree = Rollo.language.parse(source);
+  var tree = Rollo.parse(source);
 
-  tree.forEach(function(line, index, array) {
-    var cmd = line[0];
-    var params = line.slice(1);
-
-    console.log("\n" + cmd + ":");
-    if (params.length > 0) {
-      console.log("\t" + JSON.stringify(params));
-    }
-
-    Rollo.execute.call(state, cmd, params);
-
-  });
+  Rollo.execute.call(state, tree);
 
   console.log("Rollo: " + state.cmdCount + " commands evaluated, " + state.unknownCmdCount + " unknown commands encountered");
 }
