@@ -4,6 +4,10 @@
  * Date: 5/11/15
  * Time: 8:48 PM
  */
+
+var Q = require('q');
+var async = require('async-q');
+
 var commands = {
   log: log,
   say: log,
@@ -38,23 +42,38 @@ function loop(params) {
 }
 
 function pointMe(params) {
-  console.log("POINTME:");
+  return Q.fcall(function () {
+    console.log("POINTME:");
+  });
 }
 
 function waitForTap() {
+  var deferred = Q.defer();
   console.log("WAITFORTAP:");
+  setTimeout(function () {
+    console.log("TAP!");
+    deferred.resolve();
+  }, 500);
+
+  return deferred.promise;
 }
 
 function turnAround() {
-  console.log("TURNAROUND:");
+  return Q.fcall(function () {
+    console.log("TURNAROUND:");
+  });
 }
 
 function stop() {
-  console.log("STOP:");
+  return Q.fcall(function () {
+    console.log("STOP:");
+  });
 }
 
 function go() {
-  console.log("GO:");
+  return Q.fcall(function () {
+    console.log("GO:");
+  });
 }
 function setColor(params) {
   var color = params[0];
@@ -63,7 +82,9 @@ function setColor(params) {
     color = color.toUpperCase();
   }
 
-  console.log("SETCOLOR: " + color);
+  return Q.fcall(function () {
+    console.log("SETCOLOR:" + color);
+  });
 }
 
 function flash(params) {
@@ -73,16 +94,23 @@ function flash(params) {
     color = color.toUpperCase();
   }
 
-  console.log("FLASH: " + color);
+  return Q.fcall(function () {
+    console.log("FLASH: " + color);
+  });
+
 }
 function speed(params) {
   var speed = params[0];
-  console.log("SPEED: " + speed);
+  return Q.fcall(function () {
+    console.log("SPEED: " + speed);
+  });
 }
 
 function turn(params) {
   var degrees = params[0];
-  console.log("TURN: " + degrees);
+  return Q.fcall(function () {
+    console.log("TURN: " + degrees);
+  });
 }
 
 function turnRight(params) {
@@ -92,7 +120,9 @@ function turnRight(params) {
     degrees = params[0];
   }
 
-  console.log("TURNRIGHT: " + degrees);
+  return Q.fcall(function () {
+    console.log("TURNRIGHT: " + degrees);
+  });
 }
 
 function turnLeft(params) {
@@ -102,42 +132,61 @@ function turnLeft(params) {
     degrees = params[0];
   }
 
-  console.log("TURNLEFT: " + degrees);
+  return Q.fcall(function () {
+    console.log("TURNLEFT: " + degrees);
+  });
 }
 
 function log(params) {
-  params.forEach(function (param, index, array) {
-    console.log("LOG: " + param);
+  return Q.fcall(function () {
+    params.forEach(function (param, index, array) {
+      console.log("LOG: " + param);
+    });
   });
 }
 
 function wait(params) {
-  params.forEach(function (param, index, array) {
-    console.log("WAIT: " + param + " second");
-  });
+  var deferred = Q.defer();
+  console.log("WAIT: " + param + " second");
+  setTimeout(function () {
+    console.log("DONE WAITING!");
+    deferred.resolve();
+  }, params[0] * 1000);
+
+  return deferred.promise;
 }
 
 module.exports.executeCmd = executeCmd;
 
 function executeCmd(cmd, params) {
+  var deferred = Q.defer();
+
   //console.log(this);
   if (commands.hasOwnProperty(cmd)) {
     this.cmdCount++;
-    commands[cmd].call(this, params);
+    commands[cmd].call(this, params).then(deferred.resolve());
   } else {
     this.unknownCmdCount++;
     console.log("Rollo: Unsupported command -> " + cmd);
+    deferred.resolve();
   }
+
+  return deferred.promise;
 }
 
 module.exports.execute = execute;
 
 function execute(lines) {
+  var deferred = Q.defer();
+
   console.log(JSON.stringify(this));
-  lines.forEach(function (line, index, array) {
+  async.eachSeries(lines, function(line, index, array) {
     var cmd = line[0];
     var params = line.slice(1);
+    console.log(index + ": " + cmd);
 
-    executeCmd.call(this, cmd, params);
+    return executeCmd.call(this, cmd, params);
+  }).then(function() {
+    console.log("ALL DONE ROLLO");
   });
 }

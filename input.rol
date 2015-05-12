@@ -1,6 +1,4 @@
 pointMe()
-say('Waiting for a tap')
-waitForTap()
 flash(0xFF0000)
 speed(50)
 go()
@@ -21,3 +19,5 @@ loop(2) {
 turnAround()
 wait(1)
 stop()
+say('Waiting for a tap')
+waitForTap()
