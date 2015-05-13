@@ -1,6 +1,7 @@
 go
-loop(2) {
+loop(3) {
  turnLeft(45)
  flash("red")
+ wait(2)
 }
 turnAround()

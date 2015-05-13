@@ -32,12 +32,14 @@ var commands = {
 function loop(params, cb) {
   var count = params[0];
   var lines = params[1];
-  var index = 0;
-  var times = [count];
 
-  console.log("LOOP:");
-  return executeLines(lines, function(err) {
-    console.log("LOOP:END");
+  async.timesSeries(count, function (n, next) {
+    console.log("LOOP: " + (n+1) + " of " + count);
+    executeLines(lines, function (err) {
+      console.log("LOOP:END");
+      return next();
+    });
+  }, function (err, res) {
     return cb();
   });
 }
@@ -160,8 +162,8 @@ function executeLine(line, callback) {
 }
 
 function executeLines(lines, done) {
-  async.eachSeries(lines, executeLine, function(err) {
-    console.log("ROLLO: Finished execute() call");
+  async.eachSeries(lines, executeLine, function (err) {
+    //console.log("ROLLO: Finished execute() call");
     done();
   });
 }
