@@ -6,6 +6,7 @@
  */
 
 var async = require('async');
+var colors = require('./colors');
 
 var globals = {};
 
@@ -18,8 +19,7 @@ var commands = {
   turn: turn,
   speed: speed,
   flash: flash,
-  setColor: setColor,
-  color: setColor,
+  color: color,
   go: go,
   stop: stop,
   waitForTap: waitForTap,
@@ -72,23 +72,20 @@ function go(params, cb) {
   return cb();
 }
 
-function setColor(params, cb) {
-  var color = params[0];
-
-  if (typeof color === 'string') {
-    color = color.toUpperCase();
-  }
-
-  console.log("SETCOLOR: " + color);
+function color(params, cb) {
+  var color = colors.parseColor(params[0]);
+  setColor(color);
+  console.log("COLOR: " + color);
   return cb();
 }
 
 function flash(params, cb) {
-  var color = params[0];
-
-  if (typeof color === 'string') {
-    color = color.toUpperCase();
-  }
+  var color = colors.parseColor(params[0]);
+  var oldColor = getColor();
+  setColor(color);
+  setTimeout(function() {
+    setColor(oldColor);
+  }, 500);
 
   console.log("FLASH: " + color);
   return cb();
@@ -96,12 +93,14 @@ function flash(params, cb) {
 
 function speed(params, cb) {
   var speed = params[0];
+  setSpeed(speed);
   console.log("SPEED: " + speed);
   return cb();
 }
 
 function turn(params, cb) {
   var degrees = params[0];
+  adjustHeading(degrees);
   console.log("TURN: " + degrees);
   return cb();
 }
@@ -113,6 +112,7 @@ function turnRight(params, cb) {
     degrees = params[0];
   }
 
+  adjustHeading(degrees);
   console.log("TURNRIGHT: " + degrees);
   return cb();
 }
@@ -124,6 +124,7 @@ function turnLeft(params, cb) {
     degrees = params[0];
   }
 
+  adjustHeading(degrees);
   console.log("TURNLEFT: " + degrees);
   return cb();
 }
@@ -146,7 +147,43 @@ function wait(params, cb) {
   }, count * 1000);
 }
 
-module.exports.executeCmd = executeLine;
+// -------- Commands to adjust Sphero features and globals
+
+function setSpeed(speed) {
+  if (globals.speed == null) {
+    globals.speed = 0;
+  }
+  globals.speed = speed;
+}
+
+function adjustHeading(heading) {
+  if (globals.heading == null) {
+    globals.heading = 0;
+  }
+
+  globals.heading += heading;
+
+  if (globals.heading > 360) {
+    globals.heading -= 360;
+  }
+
+  if (globals.heading <0) {
+    globals.heading += 360;
+  }
+}
+
+function setColor(color) {
+  if (globals.color == null) {
+    globals.color = 0;
+  }
+  globals.color = color;
+}
+
+function getColor() {
+  return globals.color || 0x000000;
+}
+
+// -------- parse and execute lines of Rollo code
 
 function executeLine(line, callback) {
   var cmd = line[0];
@@ -170,7 +207,10 @@ function executeLines(lines, done) {
 
 module.exports.execute = execute;
 
-function execute(lines, done) {
+function execute(lines, mySphero, done) {
+  if (done == undefined) {
+    done = mySphero; // mySphero is optional
+  }
   globals = this;
   return executeLines(lines, done);
 }

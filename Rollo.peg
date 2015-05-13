@@ -9,7 +9,7 @@ go()
 turn(-45)
 log("Wait 3 seconds")
 wait(3)
-setColor('green')
+color('green')
 speed(50)
 turnRight(20)
 go
@@ -36,14 +36,12 @@ cmdWithNumber =
 
 cmdWithHexNumber =
     "flash"
-   /"setColor"
    /"color"
 
 cmdWithString =
     "log"         // log("this gets logged")
    /"say"         // alias for log
    /"flash"       // flash('red')
-   /"setColor"    // setColor("green")
    /"color"       // color("green") // alias for setColor
 
 cmdBlock =

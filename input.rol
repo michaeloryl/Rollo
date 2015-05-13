@@ -9,7 +9,7 @@ go()
 turn(-45)
 log("Wait 1 seconds")
 wait(1)
-setColor('green')
+color('green')
 speed(50)
 turnLeft(20)
 go
