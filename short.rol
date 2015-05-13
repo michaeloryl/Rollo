@@ -1,0 +1,6 @@
+turnRight()
+go()
+turn(-45)
+log("Wait 1 seconds")
+wait(1)
+setColor('green')

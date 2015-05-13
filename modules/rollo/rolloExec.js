@@ -7,6 +7,8 @@
 
 var async = require('async');
 
+var globals = {};
+
 var commands = {
   log: log,
   say: log,
@@ -31,16 +33,13 @@ function loop(params, cb) {
   var count = params[0];
   var lines = params[1];
   var index = 0;
+  var times = [count];
 
-  for (var i = 0; i < count; i++) {
-    index++;
-    console.log("LOOP " + index + " of " + count + ":");
-    for (var j = 0; j < lines.length; j++) {
-      console.log("==> " + lines[j][0] + " " + lines[j][1]);
-    }
-    console.log("END LOOP " + index + " of " + count + ":");
-  }
-  return cb();
+  console.log("LOOP:");
+  return executeLines(lines, function(err) {
+    console.log("LOOP:END");
+    return cb();
+  });
 }
 
 function pointMe(params, cb) {
@@ -145,28 +144,31 @@ function wait(params, cb) {
   }, count * 1000);
 }
 
-module.exports.executeCmd = executeCmd;
+module.exports.executeCmd = executeLine;
 
-function executeCmd(cmd, params, callback) {
-  //console.log(this);
+function executeLine(line, callback) {
+  var cmd = line[0];
+  var params = line.slice(1);
   if (commands.hasOwnProperty(cmd)) {
-    this.cmdCount++;
+    globals.cmdCount++;
     return commands[cmd].call(this, params, callback);
   } else {
-    this.unknownCmdCount++;
+    globals.unknownCmdCount++;
     console.log("Rollo: Unsupported command -> " + cmd);
     return callback();
   }
 }
 
+function executeLines(lines, done) {
+  async.eachSeries(lines, executeLine, function(err) {
+    console.log("ROLLO: Finished execute() call");
+    done();
+  });
+}
+
 module.exports.execute = execute;
 
 function execute(lines, done) {
-  console.log(JSON.stringify(this));
-  async.eachSeries(lines, function (line, callback) {
-    var cmd = line[0];
-    var params = line.slice(1);
-
-    executeCmd.call(this, cmd, params, callback);
-  }, done());
+  globals = this;
+  return executeLines(lines, done);
 }

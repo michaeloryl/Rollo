@@ -1,0 +1,6 @@
+go
+loop(2) {
+ turnLeft(45)
+ flash("red")
+}
+turnAround()

@@ -7,8 +7,8 @@ go()
 turnRight()
 go()
 turn(-45)
-log("Wait 3 seconds")
-wait(3)
+log("Wait 1 seconds")
+wait(1)
 setColor('green')
 speed(50)
 turnLeft(20)
@@ -16,7 +16,6 @@ go
 loop(2) {
  turnLeft(45)
  go()
- wait(2)
 }
 turnAround()
 wait(1)

@@ -14,8 +14,6 @@ var state = {
   unknownCmdCount: 0
 };
 
-console.log("Args: " + process.argv);
-
 var sourceFile = (process.argv.length < 3 ? 'input.rol' : process.argv[2]);
 
 fs.readFile(sourceFile, 'utf8', main);
@@ -27,10 +25,12 @@ function main(err, source) {
     return;
   }
 
+  console.log("\n\n");
+
   var tree = Rollo.parse(source);
 
   Rollo.execute.call(state, tree, function() {
-    console.log("Rollo: " + state.cmdCount + " commands evaluated, " + state.unknownCmdCount + " unknown commands encountered");
+    console.log("ROLLO: " + state.cmdCount + " commands evaluated, " + state.unknownCmdCount + " unknown commands encountered");
   });
 
 }
