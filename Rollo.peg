@@ -60,14 +60,16 @@ cmdBlock =
 
 cmd =
     "go"          // go() // go and keep going until stop() or stopFast()
-   /"stop"        // stop() // sets speed to 0 on current heading
    /"stopFast"    // stopFast() // basically does a 180 degree skid stop
+   /"stop"        // stop() // sets speed to 0 on current heading
    /"waitForTap"  // waitForTap() // waits for a single collision
    /"waitForHit"  // waitForHit() // waits for a single collision
    /"turnAround"  // turnAround() // reverse heading
    /"reverse"     // reverse() // ralias for turnAround()
    /"turnLeft"    // turnLeft() // 90 degrees left
+   /"left"
    /"turnRight"   // turnRigth() // 90 degrees right
+   /"right"
    /"pointMe"     // pointMe() // turns on calibrate mode
 
 number =

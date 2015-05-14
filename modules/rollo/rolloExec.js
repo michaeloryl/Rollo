@@ -36,31 +36,22 @@ var commands = {
   repeat: repeat
 };
 
+// ************
+// FLOW CONTROL
+// ************
+
 /*
- * REPEAT
+ * WAIT
  */
-function repeat(params, cb) {
+function wait(params, cb) {
   var count = params[0];
-  var lines = params[1];
 
-  async.timesSeries(count, function (n, next) {
-    console.log("repeat: " + (n + 1) + " of " + count);
-    executeLines(lines, function (err) {
-      console.log("repeat: end");
-      return next();
-    });
-  }, function (err, res) {
+  console.log("wait: " + count + " seconds");
+
+  setTimeout(function () {
+    console.log("wait: done");
     return cb();
-  });
-}
-
-/*
- * POINT ME
- */
-function pointMe(params, cb) {
-  console.log("pointMe:");
-  sphero().startCalibration();
-  return cb();
+  }, count * 1000);
 }
 
 /*
@@ -95,12 +86,51 @@ function waitForTap(params, cb) {
 }
 
 /*
- * TURN AROUND
+ * REPEAT
  */
-function turnAround(params, cb) {
-  adjustHeading(180);
-  console.log("turnAround:");
-  return cb();
+function repeat(params, cb) {
+  var count = params[0];
+  var lines = params[1];
+
+  async.timesSeries(count, function (n, next) {
+    console.log("repeat: " + (n + 1) + " of " + count);
+    executeLines(lines, function (err) {
+      console.log("repeat: end");
+      return next();
+    });
+  }, function (err, res) {
+    return cb();
+  });
+}
+
+// ****
+// MOVE
+// ****
+
+/*
+ * GO
+ */
+function go(params, cb) {
+  console.log("go: speed=" + getDefaultSpeed() + " heading=" + globals.heading
+    + (params[0] ? " duration=" + params[0] : ''));
+  if (sphero()) {
+    sphero().roll(getDefaultSpeed(), globals.heading)
+  }
+
+  setSpeed(getDefaultSpeed());
+
+  if (params[0]) {
+    var count = params[0];
+
+    setTimeout(function () {
+      //console.log("go: done");
+      setSpeed(0);
+      sphero().roll(0, globals.heading);
+      return cb();
+    }, count * 1000);
+  } else {
+    return cb();
+  }
 }
 
 /*
@@ -132,54 +162,17 @@ function stopFast(params, cb) {
 }
 
 /*
- * GO
+ * POINT ME
  */
-function go(params, cb) {
-  console.log("go: speed=" + getDefaultSpeed() + " heading=" + globals.heading);
-  if (sphero()) {
-    sphero().roll(getDefaultSpeed(), globals.heading)
-  }
-
-  setSpeed(getDefaultSpeed());
-
-  if (params[0]) {
-    var count = params[0];
-
-    setTimeout(function () {
-      console.log("go: done");
-      setSpeed(0);
-      sphero().roll(0, globals.heading);
-      return cb();
-    }, count * 1000);
-  } else {
-    return cb();
-  }
-}
-
-/*
- * COLOR
- */
-function color(params, cb) {
-  var color = colors.parseColor(params[0]);
-  setColor(color);
-  console.log("color: " + color);
+function pointMe(params, cb) {
+  console.log("pointMe:");
+  sphero().startCalibration();
   return cb();
 }
 
-/*
- * FLASH
- */
-function flash(params, cb) {
-  var color = colors.parseColor(params[0]);
-  var oldColor = getColor();
-  setColor(color);
-  setTimeout(function () {
-    setColor(oldColor);
-  }, 500);
-
-  console.log("flash: " + color);
-  return cb();
-}
+// **********
+// NAVIGATION
+// **********
 
 /*
  * SPEED
@@ -232,6 +225,47 @@ function turnLeft(params, cb) {
 }
 
 /*
+ * TURN AROUND
+ */
+function turnAround(params, cb) {
+  adjustHeading(180, cb);
+  console.log("turnAround:");
+}
+
+// ******
+// COLORS
+// ******
+
+/*
+ * COLOR
+ */
+function color(params, cb) {
+  var color = colors.parseColor(params[0]);
+  setColor(color);
+  console.log("color: " + color);
+  return cb();
+}
+
+/*
+ * FLASH
+ */
+function flash(params, cb) {
+  var color = colors.parseColor(params[0]);
+  var oldColor = getColor();
+  setColor(color);
+  setTimeout(function () {
+    setColor(oldColor);
+  }, 500);
+
+  console.log("flash: " + color);
+  return cb();
+}
+
+// ******
+// OUTPUT
+// ******
+
+/*
  * LOG / SAY
  */
 function log(params, cb) {
@@ -239,20 +273,6 @@ function log(params, cb) {
     console.log("say: " + param);
   });
   return cb();
-}
-
-/*
- * WAIT
- */
-function wait(params, cb) {
-  var count = params[0];
-
-  console.log("wait: " + count + " seconds");
-
-  setTimeout(function () {
-    console.log("wait: done");
-    return cb();
-  }, count * 1000);
 }
 
 // -------- Commands to adjust Sphero features and globals
@@ -279,7 +299,7 @@ function getDefaultSpeed() {
   return globals.defaultSpeed;
 }
 
-function adjustHeading(heading) {
+function adjustHeading(heading, cb) {
   if (globals.heading == null) {
     globals.heading = 0;
   }
@@ -295,7 +315,17 @@ function adjustHeading(heading) {
   }
 
   if (sphero()) { // maybe this will actually turn us if we're not moving
-    sphero().roll(globals.speed, globals.heading)
+    if (getSpeed() === 0) {
+      sphero().roll(0, globals.heading);
+      if (cb) {
+        setTimeout(function() { return cb(); }, 600); // gives 300ms for ball to fully turn around if still
+      }
+    } else {
+      sphero().roll(globals.speed, globals.heading)
+      if (cb) {
+        return cb();
+      }
+    }
   }
 }
 
