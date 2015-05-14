@@ -67,12 +67,25 @@ function pointMe(params, cb) {
  */
 function waitForTap(params, cb) {
   console.log("waitForTap:");
+  var timer;
 
   var topic = events.subscribe(TOPIC_COLLISION, function () {
     console.log("TAP!");
     topic.remove(); // no longer listen once we catch one collision
+    if (timer) {
+      clearTimeout(timer); // abort the timeOut
+      console.log("waitForTap: cleared the timeout");
+    }
     return cb();
   });
+
+  if (params[0]) {
+    timer = setTimeout(function () {
+      topic.remove();
+      console.log("waitForTap: timed out waiting for tap");
+      return cb();
+    }, (params[0] * 1000));
+  }
 }
 
 /*
@@ -300,7 +313,6 @@ function sphero() {
 }
 
 function collisionHandler(data) {
-  console.log('Collision detected');
   events.publish(TOPIC_COLLISION, convertCollisionData(data.DATA));
 }
 
@@ -319,7 +331,7 @@ function convertToSignedInt(msb, lsb) {
   if (negative) {
     msb -= 128;
   }
-  var value = msb*256 + lsb;
+  var value = msb * 256 + lsb;
   if (negative) {
     value = 0 - value;
   }

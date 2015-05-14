@@ -1,13 +1,4 @@
-color('yellow')
-waitForTap()
-speed(25%)
+color('orange')
+waitForTap(4 seconds)
 color('green')
-go(2)
-color('blue')
-go
-wait(1 second)
-repeat(1 times) {
-  turnLeft(45 degrees)
-  wait(1 second)
-}
-stop
+wait(1)
