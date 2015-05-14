@@ -7,8 +7,10 @@
 
 var async = require('async');
 var colors = require('./colors');
+var events = require('./modules/events');
 
 var globals = {};
+var TOPIC_COLLISION = 'collision';
 
 var commands = {
   log: log,
@@ -35,8 +37,8 @@ var commands = {
 };
 
 /*
-* REPEAT
-*/
+ * REPEAT
+ */
 function repeat(params, cb) {
   var count = params[0];
   var lines = params[1];
@@ -65,10 +67,12 @@ function pointMe(params, cb) {
  */
 function waitForTap(params, cb) {
   console.log("waitForTap:");
-  setTimeout(function () {
+
+  var topic = events.subscribe(TOPIC_COLLISION, function () {
     console.log("TAP!");
+    topic.remove(); // no longer listen once we catch one collision
     return cb();
-  }, 1000);
+  });
 }
 
 /*
@@ -295,6 +299,21 @@ function sphero() {
   return globals.sphero;
 }
 
+function collisionHandler(data) {
+  console.log('Collision detected');
+  events.publish(TOPIC_COLLISION, convertCollisionData(data.DATA));
+}
+
+function convertCollisionData(data) {
+  var obj = {};
+
+  obj.xImpact = convertToSignedInt(data[7], data[8]);
+  obj.yImpact = convertToSignedInt(data[9], data[10]);
+  obj.speed = data[11];
+
+  return obj;
+}
+
 // -------- parse and execute lines of Rollo code
 
 function executeLine(line, callback) {
@@ -326,6 +345,8 @@ function execute(lines, mySphero, done) {
   globals = this;
   if (sphero()) {
     adjustHeading(0);
+    sphero().configureCollisionDetection(0x01, 0x40, 0x40, 0x40, 0x40, 0x50); // defaults: 0x01, 0x40, 0x40, 0x50, 0x50, 0x50
+    sphero().on("collision", collisionHandler)
   }
   return executeLines(lines, done);
 }
