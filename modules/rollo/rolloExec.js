@@ -7,7 +7,7 @@
 
 var async = require('async');
 var colors = require('./colors');
-var events = require('./modules/events');
+var events = require('../events');
 
 var globals = {};
 var TOPIC_COLLISION = 'collision';
@@ -312,6 +312,18 @@ function convertCollisionData(data) {
   obj.speed = data[11];
 
   return obj;
+}
+
+function convertToSignedInt(msb, lsb) {
+  var negative = msb > 128;
+  if (negative) {
+    msb -= 128;
+  }
+  var value = msb*256 + lsb;
+  if (negative) {
+    value = 0 - value;
+  }
+  return value;
 }
 
 // -------- parse and execute lines of Rollo code

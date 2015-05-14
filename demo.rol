@@ -1,5 +1,5 @@
 color('yellow')
-wait(1 second)
+waitForTap()
 speed(25%)
 color('green')
 go(2)
