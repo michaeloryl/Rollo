@@ -32,7 +32,8 @@ module.exports.main = function(my) {
     var tree = Rollo.parse(source);
 
     Rollo.execute.call(state, tree, my.sphero, function() {
-      console.log("ROLLO: " + state.cmdCount + " commands evaluated, " + state.unknownCmdCount + " unknown commands encountered");
+      console.log("\n\nROLLO: " + state.cmdCount + " commands evaluated, " + state.unknownCmdCount + " unknown commands encountered");
+      console.log("ROLLO: Shutting down");
       process.exit(0);
     });
   });
