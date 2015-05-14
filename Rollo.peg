@@ -35,20 +35,22 @@ cmdWithSeconds =
 
 cmdWithPosDegrees =
     "turnRight"   // turnRight(45 degrees)
-   /"turnLeft"    // turnLeft(20)
+   /"right"       // alias for turnRight
+   /"turnLeft"    // turnLeft() // turns left 90 degrees
+   /"left"        // alias for turnLeft
 
 cmdWithDegrees =
     "turn"        // turn(180); turn(-45 degrees)
 
 cmdWithHexNumber =
-    "flash"       // flash('red')
-   /"color"       // color(0xff0000) // also red
+    "flash"       // flash(255) // blue
+   /"color"       // color(0x0000ff) // also blue
 
 cmdWithString =
     "log"         // log("this gets logged")
    /"say"         // alias for log
    /"flash"       // flash('red')
-   /"color"       // color("green") // alias for setColor
+   /"color"       // color("green")
 
 cmdBlock =
     "loop"
