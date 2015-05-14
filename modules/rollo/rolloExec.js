@@ -40,9 +40,9 @@ function repeat(params, cb) {
   var lines = params[1];
 
   async.timesSeries(count, function (n, next) {
-    console.log("REPEAT: " + (n + 1) + " of " + count);
+    console.log("repeat: " + (n + 1) + " of " + count);
     executeLines(lines, function (err) {
-      console.log("REPEAT: END");
+      console.log("repeat: end");
       return next();
     });
   }, function (err, res) {
@@ -54,7 +54,7 @@ function repeat(params, cb) {
  * POINT ME
  */
 function pointMe(params, cb) {
-  console.log("POINTME:");
+  console.log("pointMe:");
   return cb();
 }
 
@@ -62,7 +62,7 @@ function pointMe(params, cb) {
  * WAIT FOR TAP
  */
 function waitForTap(params, cb) {
-  console.log("WAITFORTAP:");
+  console.log("waitForTap:");
   setTimeout(function () {
     console.log("TAP!");
     return cb();
@@ -74,7 +74,7 @@ function waitForTap(params, cb) {
  */
 function turnAround(params, cb) {
   adjustHeading(180);
-  console.log("TURNAROUND:");
+  console.log("turnAround:");
   return cb();
 }
 
@@ -82,7 +82,7 @@ function turnAround(params, cb) {
  * STOP
  */
 function stop(params, cb) {
-  console.log("STOP:");
+  console.log("stop:");
 
   setSpeed(0);
 
@@ -96,7 +96,7 @@ function stop(params, cb) {
  * STOP FAST
  */
 function stopFast(params, cb) {
-  console.log("STOP:");
+  console.log("stopFast:");
 
   setSpeed(0);
 
@@ -110,20 +110,18 @@ function stopFast(params, cb) {
  * GO
  */
 function go(params, cb) {
-  console.log("GO: speed=" + getDefaultSpeed() + " heading=" + globals.heading);
+  console.log("go: speed=" + getDefaultSpeed() + " heading=" + globals.heading);
   if (sphero()) {
     sphero().roll(getDefaultSpeed(), globals.heading)
   }
 
   setSpeed(getDefaultSpeed());
 
-  console.log('====== GO PARAMS: ' + params[0]);
-
   if (params[0]) {
     var count = params[0];
 
     setTimeout(function () {
-      console.log("GO: DONE");
+      console.log("go: done");
       setSpeed(0);
       sphero().roll(0, globals.heading);
       return cb();
@@ -139,7 +137,7 @@ function go(params, cb) {
 function color(params, cb) {
   var color = colors.parseColor(params[0]);
   setColor(color);
-  console.log("COLOR: " + color);
+  console.log("color: " + color);
   return cb();
 }
 
@@ -154,7 +152,7 @@ function flash(params, cb) {
     setColor(oldColor);
   }, 500);
 
-  console.log("FLASH: " + color);
+  console.log("flash: " + color);
   return cb();
 }
 
@@ -164,7 +162,7 @@ function flash(params, cb) {
 function speed(params, cb) {
   var speed = params[0];
   setDefaultSpeed(Math.floor(255 * speed / 100)); // speed is a percentage of max, 255 being max
-  console.log("SPEED: " + speed);
+  console.log("speed: " + speed);
   return cb();
 }
 
@@ -174,7 +172,7 @@ function speed(params, cb) {
 function turn(params, cb) {
   var degrees = params[0];
   adjustHeading(degrees);
-  console.log("TURN: " + degrees);
+  console.log("turn: " + degrees);
   return cb();
 }
 
@@ -189,7 +187,7 @@ function turnRight(params, cb) {
   }
 
   adjustHeading(degrees);
-  console.log("TURNRIGHT: " + degrees);
+  console.log("turnRight: " + degrees);
   return cb();
 }
 
@@ -204,7 +202,7 @@ function turnLeft(params, cb) {
   }
 
   adjustHeading(-degrees);
-  console.log("TURNLEFT: " + degrees);
+  console.log("turnLeft: " + degrees);
   return cb();
 }
 
@@ -213,7 +211,7 @@ function turnLeft(params, cb) {
  */
 function log(params, cb) {
   params.forEach(function (param, index, array) {
-    console.log("LOG: " + param);
+    console.log("say: " + param);
   });
   return cb();
 }
@@ -224,10 +222,10 @@ function log(params, cb) {
 function wait(params, cb) {
   var count = params[0];
 
-  console.log("WAIT: " + count + " seconds");
+  console.log("wait: " + count + " seconds");
 
   setTimeout(function () {
-    console.log("WAIT: DONE");
+    console.log("wait: done");
     return cb();
   }, count * 1000);
 }
@@ -312,7 +310,6 @@ function executeLine(line, callback) {
 
 function executeLines(lines, done) {
   async.eachSeries(lines, executeLine, function (err) {
-    //console.log("ROLLO: Finished execute() call");
     done();
   });
 }
