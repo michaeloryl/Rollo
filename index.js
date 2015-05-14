@@ -10,6 +10,7 @@ var fs = require('fs');
 var state = {
   sphero: null,
   speed: 0,
+  defaultSpeed: 50,
   heading: 0,
   cmdCount: 0,
   unknownCmdCount: 0

@@ -2,18 +2,18 @@
 pointMe()
 log('Waiting for a tap')
 waitForTap()
-speed(50)
-go()
+speed(50%)
+go(2 seconds)
 turnRight()
-go()
-turn(-45)
+go
+turn(-45 degrees)
 log("Wait 3 seconds")
-wait(3)
+wait(3 seconds)
 color('green')
 speed(50)
-turnRight(20)
-go
-loop(2) {
+turnRight(20 degree)
+go()
+repeat(2 times) {
  turnLeft(45)
  go()
  wait(2)
@@ -25,18 +25,24 @@ stop()
 start =
     lines
 
-cmdWithPosNumber =
-    "turnRight"   // turnRight(45)
-   /"turnLeft"    // turnLeft(20)
-   /"speed"       // speed(50)
-   /"wait"        // wait(2)
+cmdWithPercent =
+    "speed"       // speed(50) // range of 0 to 100
 
-cmdWithNumber =
-    "turn"        // turn(180); turn(-45)
+cmdWithSeconds =
+    "wait"        // wait(1 second)
+   /"delay"       // alias for wait
+   /"go"          // go(2 seconds) // go for 2 seconds and stop
+
+cmdWithPosDegrees =
+    "turnRight"   // turnRight(45 degrees)
+   /"turnLeft"    // turnLeft(20)
+
+cmdWithDegrees =
+    "turn"        // turn(180); turn(-45 degrees)
 
 cmdWithHexNumber =
-    "flash"
-   /"color"
+    "flash"       // flash('red')
+   /"color"       // color(0xff0000) // also red
 
 cmdWithString =
     "log"         // log("this gets logged")
@@ -46,12 +52,16 @@ cmdWithString =
 
 cmdBlock =
     "loop"
+   /"repeat"
 
 cmd =
-    "go"          // go()
-   /"stop"        // stop()
-   /"waitForTap"  // waitForTap()
-   /"turnAround"  // turnAround()
+    "go"          // go() // go and keep going until stop() or stopFast()
+   /"stop"        // stop() // sets speed to 0 on current heading
+   /"stopFast"    // stopFast() // basically does a 180 degree skid stop
+   /"waitForTap"  // waitForTap() // waits for a single collision
+   /"waitForHit"  // waitForHit() // waits for a single collision
+   /"turnAround"  // turnAround() // reverse heading
+   /"reverse"     // reverse() // ralias for turnAround()
    /"turnLeft"    // turnLeft() // 90 degrees left
    /"turnRight"   // turnRigth() // 90 degrees right
    /"pointMe"     // pointMe() // turns on calibrate mode
@@ -73,6 +83,15 @@ hexNumber =
 times =
     " "* "time" "s"?
 
+percent =
+    " "* "%"
+
+seconds =
+    " "* "second" "s"?
+
+degrees =
+    " "* "degree" "s"?
+
 string =
     s:[a-z,A-Z,0-9 ]*
       { return s.join(""); }
@@ -82,10 +101,22 @@ statement =
       { return [c]; }
    /c:cmdBlock "(" n:number times? ")" " "* b:block
       { return [c, n, b]; }
+/*
    /c:cmdWithNumber "(" n:number ")"
       { return [c, n]; }
+*/
+   /c:cmdWithPercent "(" n:posNumber percent? ")"
+      { return [c, n]; }
+   /c:cmdWithSeconds "(" n:posNumber seconds? ")"
+      { return [c, n]; }
+   /c:cmdWithPosDegrees "(" n:posNumber degrees? ")"
+      { return [c, n]; }
+   /c:cmdWithDegrees "(" n:number degrees? ")"
+      { return [c, n]; }
+/*
    /c:cmdWithPosNumber "(" n:posNumber ")"
       { return [c, n]; }
+*/
    /c:cmdWithHexNumber "(" n:hexNumber ")"
       { return [c, n]; }
    /c:cmdWithString "(" ['] s:string ['] ")"
@@ -97,8 +128,8 @@ statement =
 
 endline =
     "\n"
-    /"\n\r"
-    /"\r\n"
+   /"\n\r"
+   /"\r\n"
 
 block =
     "{" endline? i:indentedLine+ "}" endline?

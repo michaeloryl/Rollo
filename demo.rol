@@ -1,22 +1,13 @@
 color('yellow')
-wait(1)
-speed(30)
+wait(1 second)
+speed(25%)
 color('green')
-go()
-wait(1)
-loop(2 times) {
-  turnLeft()
-  go()
-  wait(1)
-  turnRight()
-  go()
-  wait(1)
-  turnLeft()
-  go()
-  wait(1)
-  turnRight()
-  go()
-  wait(1)
-  turnAround()
+go(2)
+color('blue')
+go
+wait(1 second)
+repeat(8 times) {
+  turnLeft(45 degrees)
+  wait(1 second)
 }
-stop()
+stop

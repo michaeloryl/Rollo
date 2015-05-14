@@ -22,21 +22,27 @@ var commands = {
   color: color,
   go: go,
   stop: stop,
+  stopFast: stopFast,
   waitForTap: waitForTap,
+  waitForHit: waitForTap,
   turnAround: turnAround,
   reverse: turnAround,
   pointMe: pointMe,
-  loop: loop
+  loop: repeat,
+  repeat: repeat
 };
 
-function loop(params, cb) {
+/*
+* REPEAT
+*/
+function repeat(params, cb) {
   var count = params[0];
   var lines = params[1];
 
   async.timesSeries(count, function (n, next) {
-    console.log("LOOP: " + (n+1) + " of " + count);
+    console.log("REPEAT: " + (n + 1) + " of " + count);
     executeLines(lines, function (err) {
-      console.log("LOOP:END");
+      console.log("REPEAT: END");
       return next();
     });
   }, function (err, res) {
@@ -44,11 +50,17 @@ function loop(params, cb) {
   });
 }
 
+/*
+ * POINT ME
+ */
 function pointMe(params, cb) {
   console.log("POINTME:");
   return cb();
 }
 
+/*
+ * WAIT FOR TAP
+ */
 function waitForTap(params, cb) {
   console.log("WAITFORTAP:");
   setTimeout(function () {
@@ -57,14 +69,36 @@ function waitForTap(params, cb) {
   }, 1000);
 }
 
+/*
+ * TURN AROUND
+ */
 function turnAround(params, cb) {
   adjustHeading(180);
   console.log("TURNAROUND:");
   return cb();
 }
 
+/*
+ * STOP
+ */
 function stop(params, cb) {
   console.log("STOP:");
+
+  setSpeed(0);
+
+  if (sphero()) {
+    sphero().roll(0, globals.heading)
+  }
+  return cb();
+}
+
+/*
+ * STOP FAST
+ */
+function stopFast(params, cb) {
+  console.log("STOP:");
+
+  setSpeed(0);
 
   if (sphero()) {
     sphero().stop();
@@ -72,14 +106,36 @@ function stop(params, cb) {
   return cb();
 }
 
+/*
+ * GO
+ */
 function go(params, cb) {
-  console.log("GO: speed=" + globals.speed + " heading=" + globals.heading);
+  console.log("GO: speed=" + getDefaultSpeed() + " heading=" + globals.heading);
   if (sphero()) {
-    sphero().roll(globals.speed, globals.heading)
+    sphero().roll(getDefaultSpeed(), globals.heading)
   }
-  return cb();
+
+  setSpeed(getDefaultSpeed());
+
+  console.log('====== GO PARAMS: ' + params[0]);
+
+  if (params[0]) {
+    var count = params[0];
+
+    setTimeout(function () {
+      console.log("GO: DONE");
+      setSpeed(0);
+      sphero().roll(0, globals.heading);
+      return cb();
+    }, count * 1000);
+  } else {
+    return cb();
+  }
 }
 
+/*
+ * COLOR
+ */
 function color(params, cb) {
   var color = colors.parseColor(params[0]);
   setColor(color);
@@ -87,11 +143,14 @@ function color(params, cb) {
   return cb();
 }
 
+/*
+ * FLASH
+ */
 function flash(params, cb) {
   var color = colors.parseColor(params[0]);
   var oldColor = getColor();
   setColor(color);
-  setTimeout(function() {
+  setTimeout(function () {
     setColor(oldColor);
   }, 500);
 
@@ -99,13 +158,19 @@ function flash(params, cb) {
   return cb();
 }
 
+/*
+ * SPEED
+ */
 function speed(params, cb) {
   var speed = params[0];
-  setSpeed(speed);
+  setDefaultSpeed(Math.floor(255 * speed / 100)); // speed is a percentage of max, 255 being max
   console.log("SPEED: " + speed);
   return cb();
 }
 
+/*
+ * TURN
+ */
 function turn(params, cb) {
   var degrees = params[0];
   adjustHeading(degrees);
@@ -113,6 +178,9 @@ function turn(params, cb) {
   return cb();
 }
 
+/*
+ * TURN RIGHT
+ */
 function turnRight(params, cb) {
   var degrees = 90;
 
@@ -125,6 +193,9 @@ function turnRight(params, cb) {
   return cb();
 }
 
+/*
+ * TURN LEFT
+ */
 function turnLeft(params, cb) {
   var degrees = 90;
 
@@ -137,6 +208,9 @@ function turnLeft(params, cb) {
   return cb();
 }
 
+/*
+ * LOG / SAY
+ */
 function log(params, cb) {
   params.forEach(function (param, index, array) {
     console.log("LOG: " + param);
@@ -144,6 +218,9 @@ function log(params, cb) {
   return cb();
 }
 
+/*
+ * WAIT
+ */
 function wait(params, cb) {
   var count = params[0];
 
@@ -164,6 +241,21 @@ function setSpeed(speed) {
   globals.speed = speed;
 }
 
+function getSpeed() {
+  return globals.speed;
+}
+
+function setDefaultSpeed(speed) {
+  if (globals.defaultSpeed == null) {
+    globals.defaultSpeed = 0;
+  }
+  globals.defaultSpeed = speed;
+}
+
+function getDefaultSpeed() {
+  return globals.defaultSpeed;
+}
+
 function adjustHeading(heading) {
   if (globals.heading == null) {
     globals.heading = 0;
@@ -175,8 +267,12 @@ function adjustHeading(heading) {
     globals.heading -= 360;
   }
 
-  if (globals.heading <0) {
+  if (globals.heading < 0) {
     globals.heading += 360;
+  }
+
+  if (sphero()) { // maybe this will actually turn us if we're not moving
+    sphero().roll(globals.speed, globals.heading)
   }
 }
 
@@ -229,5 +325,8 @@ function execute(lines, mySphero, done) {
     done = mySphero; // mySphero is optional
   }
   globals = this;
+  if (sphero()) {
+    adjustHeading(0);
+  }
   return executeLines(lines, done);
 }
