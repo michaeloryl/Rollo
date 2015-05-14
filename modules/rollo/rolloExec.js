@@ -58,17 +58,25 @@ function waitForTap(params, cb) {
 }
 
 function turnAround(params, cb) {
+  adjustHeading(180);
   console.log("TURNAROUND:");
   return cb();
 }
 
 function stop(params, cb) {
   console.log("STOP:");
+
+  if (sphero()) {
+    sphero().stop();
+  }
   return cb();
 }
 
 function go(params, cb) {
-  console.log("GO:");
+  console.log("GO: speed=" + globals.speed + " heading=" + globals.heading);
+  if (sphero()) {
+    sphero().roll(globals.speed, globals.heading)
+  }
   return cb();
 }
 
@@ -124,7 +132,7 @@ function turnLeft(params, cb) {
     degrees = params[0];
   }
 
-  adjustHeading(degrees);
+  adjustHeading(-degrees);
   console.log("TURNLEFT: " + degrees);
   return cb();
 }
@@ -163,7 +171,7 @@ function adjustHeading(heading) {
 
   globals.heading += heading;
 
-  if (globals.heading > 360) {
+  if (globals.heading > 359) {
     globals.heading -= 360;
   }
 
@@ -177,10 +185,18 @@ function setColor(color) {
     globals.color = 0;
   }
   globals.color = color;
+
+  if (sphero()) {
+    sphero().setColor(color);
+  }
 }
 
 function getColor() {
   return globals.color || 0x000000;
+}
+
+function sphero() {
+  return globals.sphero;
 }
 
 // -------- parse and execute lines of Rollo code
@@ -208,6 +224,7 @@ function executeLines(lines, done) {
 module.exports.execute = execute;
 
 function execute(lines, mySphero, done) {
+  console.log(JSON.stringify(lines));
   if (done == undefined) {
     done = mySphero; // mySphero is optional
   }
