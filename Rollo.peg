@@ -32,6 +32,8 @@ cmdWithSeconds =
     "wait"        // wait(1 second)
    /"delay"       // alias for wait
    /"go"          // go(2 seconds) // go for 2 seconds and stop
+   /"waitForTap"
+   /"waitForHit"
 
 cmdWithPosDegrees =
     "turnRight"   // turnRight(45 degrees)

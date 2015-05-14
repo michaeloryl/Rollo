@@ -1,12 +1,12 @@
 color('yellow')
-wait(1 second)
+waitForTap()
 speed(25%)
 color('green')
 go(2)
 color('blue')
 go
 wait(1 second)
-repeat(8 times) {
+repeat(1 times) {
   turnLeft(45 degrees)
   wait(1 second)
 }
