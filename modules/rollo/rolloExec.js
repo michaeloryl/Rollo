@@ -59,6 +59,7 @@ function repeat(params, cb) {
  */
 function pointMe(params, cb) {
   console.log("pointMe:");
+  sphero().startCalibration();
   return cb();
 }
 
@@ -72,17 +73,22 @@ function waitForTap(params, cb) {
   var topic = events.subscribe(TOPIC_COLLISION, function () {
     console.log("TAP!");
     topic.remove(); // no longer listen once we catch one collision
+    if (sphero()) {
+      sphero().finishCalibration();
+    }
     if (timer) {
       clearTimeout(timer); // abort the timeOut
-      console.log("waitForTap: cleared the timeout");
     }
-    return cb();
+    setTimeout(function() { return cb(); }, 300); // gives 300ms for ball to settle after tapping
   });
 
   if (params[0]) {
     timer = setTimeout(function () {
       topic.remove();
       console.log("waitForTap: timed out waiting for tap");
+      if (sphero()) {
+        sphero().finishCalibration();
+      }
       return cb();
     }, (params[0] * 1000));
   }
@@ -362,13 +368,12 @@ function executeLines(lines, done) {
 module.exports.execute = execute;
 
 function execute(lines, mySphero, done) {
-  console.log(JSON.stringify(lines));
   if (done == undefined) {
     done = mySphero; // mySphero is optional
   }
   globals = this;
   if (sphero()) {
-    adjustHeading(0);
+    //adjustHeading(0);
     sphero().configureCollisionDetection(0x01, 0x40, 0x40, 0x40, 0x40, 0x50); // defaults: 0x01, 0x40, 0x40, 0x50, 0x50, 0x50
     sphero().on("collision", collisionHandler)
   }
