@@ -71,7 +71,9 @@ function waitForTap(params, cb) {
     if (timer) {
       clearTimeout(timer); // abort the timeOut
     }
-    setTimeout(function() { return cb(); }, 300); // gives 300ms for ball to settle after tapping
+    setTimeout(function () {
+      return cb();
+    }, 300); // gives 300ms for ball to settle after tapping
   });
 
   if (params[0]) {
@@ -113,7 +115,7 @@ function repeat(params, cb) {
  */
 function go(params, cb) {
   console.log("go: speed=" + getDefaultSpeed() + " heading=" + globals.heading
-    + (params[0] ? " duration=" + params[0] : ''));
+  + (params[0] ? " duration=" + params[0] : ''));
   if (sphero()) {
     sphero().roll(getDefaultSpeed(), globals.heading)
   }
@@ -344,7 +346,9 @@ function adjustHeading(heading, cb) {
     if (getSpeed() === 0) {
       sphero().roll(0, globals.heading);
       if (cb) {
-        setTimeout(function() { return cb(); }, 600); // gives 300ms for ball to fully turn around if still
+        setTimeout(function () {
+          return cb();
+        }, 600); // gives 600ms for ball to fully turn around if still
       }
     } else {
       sphero().roll(globals.speed, globals.heading)
