@@ -55,7 +55,9 @@ cmdWithString =
    /"flash"       // flash('red')
    /"color"       // color("green")
    /"pulse"       // color("green")
-   /"gosub"       // gosub MySub
+
+cmdWithLabel =
+    "gosub"       // gosub MySub
 
 cmdBlock =
     "loop"        // loop(2) // loop(2 times)
@@ -105,11 +107,11 @@ degrees =
     " "+ "degree" "s"?
 
 label =
-    s:[a-z,A-Z,0-9]*
-      { return s.join(""); }
+    s:[a-zA-Z] s2:[a-zA-Z0-9]*
+      { return s + s2.join(""); }
 
 string =
-    s:[a-z,A-Z,0-9 ]*
+    s:[a-zA-Z0-9 ]*
       { return s.join(""); }
 
 noBlockStatement =
@@ -153,13 +155,15 @@ statement =
       { return [c, n]; }
    /c:cmdWithHexNumber " "+ n:hexNumber
       { return [c, n]; }
+   /c:cmdWithLabel " "+ l:label
+      { return [c, l]; }
    /c:cmdWithString "(" ['] s:string ['] ")"
       { return [c, s]; }
-   /c:cmdWithString " "+ s:string [']
+   /c:cmdWithString " "+ ['] s:string [']
       { return [c, s]; }
    /c:cmdWithString "(" ["] s:string ["] ")"
       { return [c, s]; }
-   /c:cmdWithString " "+ s:string ["]
+   /c:cmdWithString " "+ ["] s:string ["]
       { return [c, s]; }
    /c:cmd "()"
       { return [c]; }
