@@ -1,26 +1,16 @@
 /* http://pegjs.org/online
-pointMe()
-log('Waiting for a tap')
-waitForTap()
-speed(50%)
-go(2 seconds)
-turnRight()
-go
-turn(-45 degrees)
-log("Wait 3 seconds")
-wait(3 seconds)
-color('green')
-speed(50)
-turnRight(20 degree)
-go()
-repeat(2 times) {
- turnLeft(45)
- go()
- wait(2)
+speed 20
+repeat 2 times {
+ go 2
+ reverse
+ repeat 1 time {
+  pulse 'red'
+  gosub mySub
+ }
 }
-turnAround()
-wait(1)
-stop()
+sub mySub {
+ say "this is a message"
+}
 */
 start =
     lines
@@ -95,16 +85,16 @@ hexNumber =
       { return parseInt(n1 + n2.join("")); }
 
 times =
-    " "+ "time" "s"?
+    __ "time" "s"?
 
 percent =
-    " "* "%"
+    _ "%"
 
 seconds =
-    " "+ "second" "s"?
+    __ "second" "s"?
 
 degrees =
-    " "+ "degree" "s"?
+    __ "degree" "s"?
 
 label =
     s:[a-zA-Z] s2:[a-zA-Z0-9]*
@@ -114,82 +104,60 @@ string =
     s:[a-zA-Z0-9 ]*
       { return s.join(""); }
 
-noBlockStatement =
-    c:cmdBlockWithLabel " "+ l:label " "* b:block
+rootStatement =
+    c:cmdBlockWithLabel __ l:label " "* b:block
       { return [c, l, b]; }
 
 statement =
-    c:cmdBlock "(" n:number times? ")" " "* b:block
-      { return [c, n, b]; }
-   /c:cmdBlock " "+ n:number times? " "* b:block
+    c:cmdBlock __ n:number times? " "* b:block
       { return [c, n, b]; }
 /*
-   /c:cmdWithNumber "(" n:number ")"
-      { return [c, n]; }
-   /c:cmdWithNumber " "+ n:number
+   /c:cmdWithNumber __ n:number
       { return [c, n]; }
 */
-   /c:cmdWithPercent "(" n:posNumber percent? ")"
+   /c:cmdWithPercent __ n:posNumber percent?
       { return [c, n]; }
-   /c:cmdWithPercent " "+ n:posNumber percent?
+   /c:cmdWithSeconds __ n:posNumber seconds?
       { return [c, n]; }
-   /c:cmdWithSeconds "(" n:posNumber seconds? ")"
+   /c:cmdWithPosDegrees __ n:posNumber degrees?
       { return [c, n]; }
-   /c:cmdWithSeconds " "+ n:posNumber seconds?
-      { return [c, n]; }
-   /c:cmdWithPosDegrees "(" n:posNumber degrees? ")"
-      { return [c, n]; }
-   /c:cmdWithPosDegrees " "+ n:posNumber degrees?
-      { return [c, n]; }
-   /c:cmdWithDegrees "(" n:number degrees? ")"
-      { return [c, n]; }
-   /c:cmdWithDegrees " "+ n:number degrees?
+   /c:cmdWithDegrees __ n:number degrees?
       { return [c, n]; }
 /*
-   /c:cmdWithPosNumber "(" n:posNumber ")"
-      { return [c, n]; }
-   /c:cmdWithPosNumber " "+ n:posNumber
+   /c:cmdWithPosNumber __ n:posNumber
       { return [c, n]; }
 */
-   /c:cmdWithHexNumber "(" n:hexNumber ")"
+   /c:cmdWithHexNumber __ n:hexNumber
       { return [c, n]; }
-   /c:cmdWithHexNumber " "+ n:hexNumber
-      { return [c, n]; }
-   /c:cmdWithLabel " "+ l:label
+   /c:cmdWithLabel __ l:label
       { return [c, l]; }
-   /c:cmdWithString "(" ['] s:string ['] ")"
+   /c:cmdWithString __ ['] s:string [']
       { return [c, s]; }
-   /c:cmdWithString " "+ ['] s:string [']
-      { return [c, s]; }
-   /c:cmdWithString "(" ["] s:string ["] ")"
-      { return [c, s]; }
-   /c:cmdWithString " "+ ["] s:string ["]
+   /c:cmdWithString __ ["] s:string ["]
       { return [c, s]; }
    /c:cmd "()"
       { return [c]; }
    /c:cmd
       { return [c]; }
 
-endline =
-    "\n"
-   /"\n\r"
-   /"\r\n"
+endline = _ [\r\n]+
+
+_  = [ \t]*                         // optional whitespace
+
+__ = [ \t]+                         // mandatory whitespace
 
 block =
-    "{" endline? i:blockLine+ " "* "}" endline?
+    "{" endline? i:blockLine+ _ "}" endline?
       { return i }
 
-blockLine =
-    " "* s:statement endline?
+blockLine =                         // these can be inside blocks
+    _ s:statement endline?
       { return s }
 
-noBlockLine =
-    " "* s:noBlockStatement endline?
+rootLine =                          // these cannot be inside blocks
+    _ s:rootStatement endline?
       { return s }
 
-line =
-    blockLine
-   /noBlockLine
+line = blockLine/rootLine
 
-lines =
-   line*
+lines = line*
