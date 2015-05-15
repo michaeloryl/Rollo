@@ -327,6 +327,24 @@ function getDefaultSpeed() {
   return globals.defaultSpeed;
 }
 
+function setHeading(heading, cb) {
+  if (sphero()) { // maybe this will actually turn us if we're not moving
+    if (getSpeed() === 0) {
+      sphero().roll(0, globals.heading);
+      if (cb) {
+        setTimeout(function () {
+          return cb();
+        }, 600); // gives 600ms for ball to fully turn around if still
+      }
+    } else {
+      sphero().roll(globals.speed, globals.heading);
+      if (cb) {
+        return cb();
+      }
+    }
+  }
+}
+
 function adjustHeading(heading, cb) {
   if (globals.heading == null) {
     globals.heading = 0;
@@ -342,21 +360,7 @@ function adjustHeading(heading, cb) {
     globals.heading += 360;
   }
 
-  if (sphero()) { // maybe this will actually turn us if we're not moving
-    if (getSpeed() === 0) {
-      sphero().roll(0, globals.heading);
-      if (cb) {
-        setTimeout(function () {
-          return cb();
-        }, 600); // gives 600ms for ball to fully turn around if still
-      }
-    } else {
-      sphero().roll(globals.speed, globals.heading)
-      if (cb) {
-        return cb();
-      }
-    }
-  }
+  return setHeading(heading, cb);
 }
 
 function setColor(color) {
@@ -445,7 +449,7 @@ function execute(lines, mySphero, done) {
   }
   globals = this;
   if (sphero()) {
-    //adjustHeading(0);
+    setHeading(0);
     sphero().configureCollisionDetection(0x01, 0x40, 0x40, 0x40, 0x40, 0x50); // defaults: 0x01, 0x40, 0x40, 0x50, 0x50, 0x50
     sphero().on("collision", collisionHandler)
   }
