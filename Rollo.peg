@@ -55,10 +55,14 @@ cmdWithString =
    /"flash"       // flash('red')
    /"color"       // color("green")
    /"pulse"       // color("green")
+   /"gosub"       // gosub MySub
 
 cmdBlock =
-    "loop"
-   /"repeat"
+    "loop"        // loop(2) // loop(2 times)
+   /"repeat"      // repeat(3) // repeat(1 time)
+
+cmdBlockWithLabel =
+    "sub"         // subroutine MySub { stuff }
 
 cmd =
     "go"          // go() // go and keep going until stop() or stopFast()
@@ -89,48 +93,76 @@ hexNumber =
       { return parseInt(n1 + n2.join("")); }
 
 times =
-    " "* "time" "s"?
+    " "+ "time" "s"?
 
 percent =
     " "* "%"
 
 seconds =
-    " "* "second" "s"?
+    " "+ "second" "s"?
 
 degrees =
-    " "* "degree" "s"?
+    " "+ "degree" "s"?
+
+label =
+    s:[a-z,A-Z,0-9]*
+      { return s.join(""); }
 
 string =
     s:[a-z,A-Z,0-9 ]*
       { return s.join(""); }
 
+noBlockStatement =
+    c:cmdBlockWithLabel " "+ l:label " "* b:block
+      { return [c, l, b]; }
+
 statement =
-   c:cmd "()"
-      { return [c]; }
-   /c:cmdBlock "(" n:number times? ")" " "* b:block
+    c:cmdBlock "(" n:number times? ")" " "* b:block
+      { return [c, n, b]; }
+   /c:cmdBlock " "+ n:number times? " "* b:block
       { return [c, n, b]; }
 /*
    /c:cmdWithNumber "(" n:number ")"
       { return [c, n]; }
+   /c:cmdWithNumber " "+ n:number
+      { return [c, n]; }
 */
    /c:cmdWithPercent "(" n:posNumber percent? ")"
       { return [c, n]; }
+   /c:cmdWithPercent " "+ n:posNumber percent?
+      { return [c, n]; }
    /c:cmdWithSeconds "(" n:posNumber seconds? ")"
+      { return [c, n]; }
+   /c:cmdWithSeconds " "+ n:posNumber seconds?
       { return [c, n]; }
    /c:cmdWithPosDegrees "(" n:posNumber degrees? ")"
       { return [c, n]; }
+   /c:cmdWithPosDegrees " "+ n:posNumber degrees?
+      { return [c, n]; }
    /c:cmdWithDegrees "(" n:number degrees? ")"
+      { return [c, n]; }
+   /c:cmdWithDegrees " "+ n:number degrees?
       { return [c, n]; }
 /*
    /c:cmdWithPosNumber "(" n:posNumber ")"
       { return [c, n]; }
+   /c:cmdWithPosNumber " "+ n:posNumber
+      { return [c, n]; }
 */
    /c:cmdWithHexNumber "(" n:hexNumber ")"
       { return [c, n]; }
+   /c:cmdWithHexNumber " "+ n:hexNumber
+      { return [c, n]; }
    /c:cmdWithString "(" ['] s:string ['] ")"
+      { return [c, s]; }
+   /c:cmdWithString " "+ s:string [']
       { return [c, s]; }
    /c:cmdWithString "(" ["] s:string ["] ")"
       { return [c, s]; }
+   /c:cmdWithString " "+ s:string ["]
+      { return [c, s]; }
+   /c:cmd "()"
+      { return [c]; }
    /c:cmd
       { return [c]; }
 
@@ -140,16 +172,20 @@ endline =
    /"\r\n"
 
 block =
-    "{" endline? i:indentedLine+ "}" endline?
+    "{" endline? i:blockLine+ " "* "}" endline?
       { return i }
 
-indentedLine =
+blockLine =
     " "* s:statement endline?
       { return s }
 
-line =
-    s:statement endline?
+noBlockLine =
+    " "* s:noBlockStatement endline?
       { return s }
 
+line =
+    blockLine
+   /noBlockLine
+
 lines =
-    line*
+   line*
