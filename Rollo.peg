@@ -47,12 +47,14 @@ cmdWithDegrees =
 cmdWithHexNumber =
     "flash"       // flash(255) // blue
    /"color"       // color(0x0000ff) // also blue
+   /"pulse"       // color(0x0000ff) // also blue
 
 cmdWithString =
     "log"         // log("this gets logged")
    /"say"         // alias for log
    /"flash"       // flash('red')
    /"color"       // color("green")
+   /"pulse"       // color("green")
 
 cmdBlock =
     "loop"

@@ -24,6 +24,7 @@ var commands = {
   speed: speed,
   flash: flash,
   color: color,
+  pulse: pulse,
   go: go,
   stop: stop,
   stopFast: stopFast,
@@ -261,6 +262,31 @@ function flash(params, cb) {
   return cb();
 }
 
+/*
+ * PULSE
+ */
+function pulse(params, cb) {
+  var brightness = [10, 18, 25, 50, 75, 82, 90, 95, 100, 95, 90, 82, 75, 50, 25, 18, 10, 0];
+  var color = colors.parseColor(params[0]);
+  var oldColor = getColor();
+
+  console.log("pulse: " + color);
+
+  async.eachSeries(brightness, function (b, next) {
+    if (b !== 0) {
+      setColor(darkenColor(color, b));
+      setTimeout(function () {
+        return next();
+      }, 18);
+    } else {
+      setColor(oldColor);
+      return next();
+    }
+  });
+
+  return cb();
+}
+
 // ******
 // OUTPUT
 // ******
@@ -372,6 +398,18 @@ function convertToSignedInt(msb, lsb) {
     value = 0 - value;
   }
   return value;
+}
+
+function darkenColor(color, percentage) {
+  var r = (color >> 16) & 0xFF;
+  var g = (color >> 8) & 0xFF;
+  var b = color & 0xFF;
+
+  r = Math.floor(r * (percentage / 100)) << 16;
+  g = Math.floor(g * (percentage / 100)) << 8;
+  b = Math.floor(b * (percentage / 100));
+
+  return r + g + b;
 }
 
 // -------- parse and execute lines of Rollo code
