@@ -1,4 +1,9 @@
-color('orange')
-waitForTap(4 seconds)
-color('green')
-wait(1)
+speed 25
+repeat 2 times {
+  gosub mySub
+}
+sub mySub {
+  wait 1
+  pulse 'red'
+}
+

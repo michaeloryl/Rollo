@@ -8,9 +8,12 @@
 var async = require('async');
 var colors = require('./colors');
 var events = require('../events');
+var _ = require('lodash');
 
 var globals = {};
 var TOPIC_COLLISION = 'collision';
+
+var subroutines = {};
 
 var commands = {
   log: log,
@@ -34,7 +37,8 @@ var commands = {
   reverse: turnAround,
   pointMe: pointMe,
   loop: repeat,
-  repeat: repeat
+  repeat: repeat,
+  gosub: gosub
 };
 
 // ************
@@ -104,6 +108,16 @@ function repeat(params, cb) {
   }, function (err, res) {
     return cb();
   });
+}
+
+function gosub(params, cb) {
+  var label = params[0];
+
+  if (subroutines.hasOwnProperty(label)) {
+    return executeLines(subroutines[label], cb);
+  } else {
+    return cb();
+  }
 }
 
 // ****
@@ -422,6 +436,19 @@ function darkenColor(color, percentage) {
 
 // -------- parse and execute lines of Rollo code
 
+function hoistSubroutines(lines) {
+  return _.filter(lines, function(line) {
+    var cmd = line[0];
+    var params = line.slice(1);
+    if (cmd === 'sub') {
+      subroutines[params[0]] = params[1];
+      return false;
+    } else {
+      return true;
+    }
+  });
+}
+
 function executeLine(line, callback) {
   var cmd = line[0];
   var params = line.slice(1);
@@ -453,5 +480,5 @@ function execute(lines, mySphero, done) {
     sphero().configureCollisionDetection(0x01, 0x40, 0x40, 0x40, 0x40, 0x50); // defaults: 0x01, 0x40, 0x40, 0x50, 0x50, 0x50
     sphero().on("collision", collisionHandler)
   }
-  return executeLines(lines, done);
+  return executeLines(hoistSubroutines(lines), done);
 }
